@@ -1,29 +1,44 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DollarSign, Package, ShoppingCart, Users } from "lucide-react";
+import { DollarSign, LogOut, Package, ShoppingCart, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/site/Logo";
+import { AdminAccountPanel } from "@/components/admin/AdminAccountPanel";
+import { AdminAuthGate } from "@/components/admin/AdminAuthGate";
+import { ProductsAdminPanel } from "@/components/admin/ProductsAdminPanel";
 import { coupons, customers, messages, orders, salesTrend, subscribers } from "@/data/admin";
 import { blogCategories, posts } from "@/data/blog";
-import { categories, products, reviews } from "@/data/products";
+import { reviews } from "@/data/products";
+import { useCatalog } from "@/lib/catalog";
 import { money } from "@/lib/store";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Admin Dashboard — Northbay Retail Co." },
-      { name: "description", content: "Internal admin dashboard for products, orders, customers, content and store settings." },
+      {
+        name: "description",
+        content:
+          "Internal admin dashboard for products, orders, customers, content and store settings.",
+      },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: AdminPage,
 });
 
-const revenue = orders.filter((o) => o.status !== "Cancelled" && o.status !== "Refunded").reduce((s, o) => s + o.total, 0);
+const revenue = orders
+  .filter((o) => o.status !== "Cancelled" && o.status !== "Refunded")
+  .reduce((s, o) => s + o.total, 0);
 
 function AdminPage() {
+  return <AdminAuthGate>{(ctx) => <AdminDashboard {...ctx} />}</AdminAuthGate>;
+}
+
+function AdminDashboard({ username, logout }: { username: string; logout: () => void }) {
+  const { products } = useCatalog();
   return (
     <div className="min-h-screen bg-surface">
       <header className="border-b border-border bg-background">
@@ -32,13 +47,23 @@ function AdminPage() {
             <Logo />
             <span className="rounded-md bg-secondary px-2 py-1 text-xs font-semibold">Admin</span>
           </div>
-          <Button variant="outline" size="sm" asChild><Link to="/">View storefront</Link></Button>
+          <div className="flex items-center gap-2">
+            <span className="hidden text-sm text-muted-foreground sm:inline">{username}</span>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/">View storefront</Link>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={logout}>
+              <LogOut className="size-4" /> Log out
+            </Button>
+          </div>
         </div>
       </header>
 
       <div className="container-page py-8">
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Demo data for layout purposes — replace with live business data.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Demo data for layout purposes — replace with live business data.
+        </p>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Kpi icon={DollarSign} label="Revenue (demo)" value={money(revenue)} />
@@ -67,7 +92,9 @@ function AdminPage() {
                     <td className="p-3 text-muted-foreground">{o.date}</td>
                     <td className="p-3">{o.items}</td>
                     <td className="p-3">{money(o.total)}</td>
-                    <td className="p-3"><Badge variant="secondary">{o.status}</Badge></td>
+                    <td className="p-3">
+                      <Badge variant="secondary">{o.status}</Badge>
+                    </td>
                   </tr>
                 ))}
               </Table>
@@ -86,19 +113,7 @@ function AdminPage() {
           </TabsContent>
 
           <TabsContent value="products" className="pt-6">
-            <Panel title={`Products (${products.length}) · Categories (${categories.length})`}>
-              <Table head={["SKU", "Product", "Category", "Price", "Stock"]}>
-                {products.slice(0, 12).map((p) => (
-                  <tr key={p.id} className="border-b border-border last:border-0">
-                    <td className="p-3 text-muted-foreground">{p.sku}</td>
-                    <td className="p-3 font-medium">{p.name}</td>
-                    <td className="p-3">{p.category}</td>
-                    <td className="p-3">{money(p.price)}</td>
-                    <td className="p-3">{p.stock}</td>
-                  </tr>
-                ))}
-              </Table>
-            </Panel>
+            <ProductsAdminPanel />
           </TabsContent>
 
           <TabsContent value="customers" className="pt-6">
@@ -128,11 +143,14 @@ function AdminPage() {
                   </li>
                 ))}
               </ul>
-              <p className="p-3 text-xs text-muted-foreground">Categories: {blogCategories.join(", ")}</p>
+              <p className="p-3 text-xs text-muted-foreground">
+                Categories: {blogCategories.join(", ")}
+              </p>
             </Panel>
             <Panel title={`Reviews awaiting content (${reviews.length})`}>
               <p className="p-4 text-sm text-muted-foreground">
-                No reviews stored. Genuine customer reviews added here appear on product pages and the reviews page.
+                No reviews stored. Genuine customer reviews added here appear on product pages and
+                the reviews page.
               </p>
             </Panel>
             <Panel title="Contact messages">
@@ -142,7 +160,9 @@ function AdminPage() {
                     <td className="p-3 text-muted-foreground">{m.id}</td>
                     <td className="p-3">{m.name}</td>
                     <td className="p-3">{m.subject}</td>
-                    <td className="p-3"><Badge variant="secondary">{m.status}</Badge></td>
+                    <td className="p-3">
+                      <Badge variant="secondary">{m.status}</Badge>
+                    </td>
                   </tr>
                 ))}
               </Table>
@@ -158,7 +178,9 @@ function AdminPage() {
                     <td className="p-3">{c.type}</td>
                     <td className="p-3">{c.value}</td>
                     <td className="p-3 text-muted-foreground">{c.usage}</td>
-                    <td className="p-3"><Badge variant="secondary">{c.status}</Badge></td>
+                    <td className="p-3">
+                      <Badge variant="secondary">{c.status}</Badge>
+                    </td>
                   </tr>
                 ))}
               </Table>
@@ -177,11 +199,26 @@ function AdminPage() {
           </TabsContent>
 
           <TabsContent value="settings" className="grid gap-6 pt-6 lg:grid-cols-2">
+            <Panel title="Admin account">
+              <AdminAccountPanel username={username} />
+            </Panel>
             {[
-              { t: "Website settings", d: "Company name, contact details, business hours and social links are edited in the company profile file." },
-              { t: "Shipping settings", d: "Processing times, carriers, rates and free-shipping threshold are edited in the shipping policy and company profile." },
-              { t: "Return policy settings", d: "Return window, eligibility and refund timing are edited in the returns policy content." },
-              { t: "Privacy & terms", d: "Privacy policy and terms & conditions content are edited in their respective policy files." },
+              {
+                t: "Website settings",
+                d: "Company name, contact details, business hours and social links are edited in the company profile file.",
+              },
+              {
+                t: "Shipping settings",
+                d: "Processing times, carriers, rates and free-shipping threshold are edited in the shipping policy and company profile.",
+              },
+              {
+                t: "Return policy settings",
+                d: "Return window, eligibility and refund timing are edited in the returns policy content.",
+              },
+              {
+                t: "Privacy & terms",
+                d: "Privacy policy and terms & conditions content are edited in their respective policy files.",
+              },
             ].map((s) => (
               <Panel key={s.t} title={s.t}>
                 <p className="p-4 text-sm text-muted-foreground">{s.d}</p>
@@ -194,19 +231,39 @@ function AdminPage() {
   );
 }
 
-function Kpi({ icon: Icon, label, value }: { icon: typeof DollarSign; label: string; value: string }) {
+function Kpi({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof DollarSign;
+  label: string;
+  value: string;
+}) {
   return (
-    <Card><CardContent className="flex items-center gap-4 p-5">
-      <span className="grid size-10 place-items-center rounded-lg bg-primary text-primary-foreground"><Icon className="size-5" aria-hidden="true" /></span>
-      <div>
-        <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
-        <p className="text-xl font-bold">{value}</p>
-      </div>
-    </CardContent></Card>
+    <Card>
+      <CardContent className="flex items-center gap-4 p-5">
+        <span className="grid size-10 place-items-center rounded-lg bg-primary text-primary-foreground">
+          <Icon className="size-5" aria-hidden="true" />
+        </span>
+        <div>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
+          <p className="text-xl font-bold">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
-function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
+function Panel({
+  title,
+  children,
+  className = "",
+}: {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <section className={`overflow-hidden rounded-xl border border-border bg-card ${className}`}>
       <h2 className="border-b border-border p-4 text-sm font-semibold">{title}</h2>
@@ -220,7 +277,11 @@ function Table({ head, children }: { head: string[]; children: React.ReactNode }
     <table className="w-full min-w-[560px] text-sm">
       <thead className="bg-surface">
         <tr className="border-b border-border text-left">
-          {head.map((h) => <th key={h} scope="col" className="p-3 font-medium">{h}</th>)}
+          {head.map((h) => (
+            <th key={h} scope="col" className="p-3 font-medium">
+              {h}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>{children}</tbody>

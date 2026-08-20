@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { company, fullAddress } from "@/data/company";
-import { categories } from "@/data/products";
+import { useCatalog } from "@/lib/catalog";
 import { Logo } from "./Logo";
 import { NewsletterForm } from "./Newsletter";
 
@@ -28,6 +28,7 @@ const policies = [
 ] as const;
 
 export function Footer() {
+  const { categories } = useCatalog();
   return (
     <footer className="mt-auto border-t border-border bg-primary text-primary-foreground">
       <div className="container-page grid gap-10 py-14 lg:grid-cols-12">
@@ -70,7 +71,11 @@ export function Footer() {
           <FooterCol title="Shop">
             {categories.map((c) => (
               <li key={c.slug}>
-                <Link to="/shop" search={{ category: c.slug }} className="text-primary-foreground/75 transition-colors hover:text-primary-foreground">
+                <Link
+                  to="/shop"
+                  search={{ category: c.slug }}
+                  className="text-primary-foreground/75 transition-colors hover:text-primary-foreground"
+                >
                   {c.name}
                 </Link>
               </li>
@@ -79,7 +84,10 @@ export function Footer() {
           <FooterCol title="Customer Service">
             {customerService.map((l) => (
               <li key={l.to + l.label}>
-                <Link to={l.to} className="text-primary-foreground/75 transition-colors hover:text-primary-foreground">
+                <Link
+                  to={l.to}
+                  className="text-primary-foreground/75 transition-colors hover:text-primary-foreground"
+                >
                   {l.label}
                 </Link>
               </li>
@@ -88,7 +96,10 @@ export function Footer() {
           <FooterCol title="Company">
             {companyLinks.map((l) => (
               <li key={l.to}>
-                <Link to={l.to} className="text-primary-foreground/75 transition-colors hover:text-primary-foreground">
+                <Link
+                  to={l.to}
+                  className="text-primary-foreground/75 transition-colors hover:text-primary-foreground"
+                >
                   {l.label}
                 </Link>
               </li>

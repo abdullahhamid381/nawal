@@ -18,8 +18,9 @@ import { ProductCard } from "@/components/site/ProductCard";
 import { Reveal } from "@/components/site/Reveal";
 import { TrustBar } from "@/components/site/TrustBar";
 import { NewsletterForm } from "@/components/site/Newsletter";
-import { categories, featuredProducts, products, reviews } from "@/data/products";
+import { reviews } from "@/data/products";
 import { company } from "@/data/company";
+import { useCatalog } from "@/lib/catalog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,7 +31,10 @@ export const Route = createFileRoute("/")({
         content:
           "Shop quality everyday products from Northbay Retail Co. Secure checkout, tracked shipping, straightforward returns and responsive customer support.",
       },
-      { property: "og:title", content: "Northbay Retail Co. — Quality Products. Reliable Service." },
+      {
+        property: "og:title",
+        content: "Northbay Retail Co. — Quality Products. Reliable Service.",
+      },
       {
         property: "og:description",
         content:
@@ -60,6 +64,7 @@ function Index() {
 }
 
 function Hero() {
+  const { products, categories } = useCatalog();
   return (
     <section className="relative overflow-hidden bg-surface">
       <div className="container-page grid items-center gap-10 py-14 lg:grid-cols-2 lg:py-20">
@@ -73,7 +78,10 @@ function Hero() {
             Independent online retailer
           </span>
           <h1 className="mt-5 text-balance-tight text-4xl font-extrabold leading-[1.08] md:text-5xl lg:text-6xl">
-            Quality Products.<br />Reliable Service.<br />
+            Quality Products.
+            <br />
+            Reliable Service.
+            <br />
             <span className="text-primary">Trusted Shopping.</span>
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
@@ -118,7 +126,9 @@ function Hero() {
               </span>
               <div>
                 <p className="text-sm font-semibold">Tracked on every order</p>
-                <p className="text-xs text-muted-foreground">Tracking details sent by email at dispatch</p>
+                <p className="text-xs text-muted-foreground">
+                  Tracking details sent by email at dispatch
+                </p>
               </div>
             </div>
           </div>
@@ -137,11 +147,23 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SectionHead({ eyebrow, title, description, action }: { eyebrow: string; title: string; description?: string; action?: React.ReactNode }) {
+function SectionHead({
+  eyebrow,
+  title,
+  description,
+  action,
+}: {
+  eyebrow: string;
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+}) {
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent-foreground/70">{eyebrow}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent-foreground/70">
+          {eyebrow}
+        </p>
         <h2 className="mt-2 text-2xl font-bold md:text-3xl">{title}</h2>
         {description && <p className="mt-2 max-w-2xl text-muted-foreground">{description}</p>}
       </div>
@@ -151,6 +173,7 @@ function SectionHead({ eyebrow, title, description, action }: { eyebrow: string;
 }
 
 function Categories() {
+  const { categories } = useCatalog();
   return (
     <section className="container-page py-16">
       <Reveal>
@@ -189,7 +212,8 @@ function Categories() {
                 <h3 className="text-base font-semibold">{c.name}</h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">{c.description}</p>
                 <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-                  Shop category <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                  Shop category{" "}
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </div>
             </Link>
@@ -201,6 +225,8 @@ function Categories() {
 }
 
 function Featured() {
+  const { products } = useCatalog();
+  const featuredProducts = products.filter((p) => p.badge === "Best Seller" || p.badge === "New");
   return (
     <section className="border-y border-border bg-surface py-16">
       <div className="container-page">
@@ -227,17 +253,37 @@ function Featured() {
 }
 
 const reasons = [
-  { icon: PackageSearch, title: "Authentic products", body: "We source from authorised suppliers and inspect inventory before it is listed for sale." },
-  { icon: Lock, title: "Secure shopping", body: "Checkout runs over encrypted connections and card details are handled by the payment provider, never stored by us." },
-  { icon: Truck, title: "Dependable shipping", body: "Orders are processed on business days and every shipment includes carrier tracking." },
-  { icon: Headset, title: "Customer-first service", body: `Questions are answered by our support team, typically within ${company.supportResponseTime}.` },
+  {
+    icon: PackageSearch,
+    title: "Authentic products",
+    body: "We source from authorised suppliers and inspect inventory before it is listed for sale.",
+  },
+  {
+    icon: Lock,
+    title: "Secure shopping",
+    body: "Checkout runs over encrypted connections and card details are handled by the payment provider, never stored by us.",
+  },
+  {
+    icon: Truck,
+    title: "Dependable shipping",
+    body: "Orders are processed on business days and every shipment includes carrier tracking.",
+  },
+  {
+    icon: Headset,
+    title: "Customer-first service",
+    body: `Questions are answered by our support team, typically within ${company.supportResponseTime}.`,
+  },
 ];
 
 function WhyChooseUs() {
   return (
     <section className="container-page py-16">
       <Reveal>
-        <SectionHead eyebrow="Why choose us" title="Built around the details that matter" description="A retail operation focused on accurate listings, careful packing and clear communication." />
+        <SectionHead
+          eyebrow="Why choose us"
+          title="Built around the details that matter"
+          description="A retail operation focused on accurate listings, careful packing and clear communication."
+        />
       </Reveal>
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         {reasons.map((r, i) => (
@@ -273,11 +319,14 @@ function Operations() {
           />
         </Reveal>
         <Reveal delay={0.08}>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent-foreground/70">Fulfillment</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent-foreground/70">
+            Fulfillment
+          </p>
           <h2 className="mt-2 text-2xl font-bold md:text-3xl">Fast, careful and fully tracked</h2>
           <p className="mt-3 text-muted-foreground">
-            Orders placed before our daily cut-off are picked the same business day. Items are packed with protective
-            materials appropriate to the product, and a tracking number is emailed as soon as the carrier collects.
+            Orders placed before our daily cut-off are picked the same business day. Items are
+            packed with protective materials appropriate to the product, and a tracking number is
+            emailed as soon as the carrier collects.
           </p>
           <ul className="mt-6 space-y-4">
             {[
@@ -328,8 +377,8 @@ function Reviews() {
             <Quote className="mx-auto size-8 text-muted-foreground" aria-hidden="true" />
             <h3 className="mt-4 text-lg font-semibold">No published reviews yet</h3>
             <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
-              Verified reviews from customers will appear here as orders are delivered. We do not publish incentivised
-              or unverified feedback.
+              Verified reviews from customers will appear here as orders are delivered. We do not
+              publish incentivised or unverified feedback.
             </p>
             <Button className="mt-6" variant="outline" asChild>
               <Link to="/reviews">Learn how reviews work</Link>
@@ -343,9 +392,21 @@ function Reviews() {
 
 function SupportRow() {
   const items = [
-    { icon: CreditCard, title: "Secure payments", body: "Major cards and digital wallets processed by an established payment provider. We never store full card numbers." },
-    { icon: Truck, title: "Fast, reliable shipping", body: `Free standard shipping on orders over $${company.freeShippingThreshold}. Expedited options available at checkout.` },
-    { icon: MessageSquare, title: "Customer support", body: `Email ${company.email} or call ${company.phone} during business hours.` },
+    {
+      icon: CreditCard,
+      title: "Secure payments",
+      body: "Major cards and digital wallets processed by an established payment provider. We never store full card numbers.",
+    },
+    {
+      icon: Truck,
+      title: "Fast, reliable shipping",
+      body: `Free standard shipping on orders over $${company.freeShippingThreshold}. Expedited options available at checkout.`,
+    },
+    {
+      icon: MessageSquare,
+      title: "Customer support",
+      body: `Email ${company.email} or call ${company.phone} during business hours.`,
+    },
   ];
   return (
     <section className="border-t border-border bg-primary py-16 text-primary-foreground">
@@ -373,8 +434,8 @@ function NewsletterBand() {
             <div>
               <h2 className="text-2xl font-bold md:text-3xl">Product guides and restock notices</h2>
               <p className="mt-2 max-w-xl text-muted-foreground">
-                Join our email list for buying guides, product education and occasional offers. No spam, unsubscribe at
-                any time.
+                Join our email list for buying guides, product education and occasional offers. No
+                spam, unsubscribe at any time.
               </p>
             </div>
             <NewsletterForm />

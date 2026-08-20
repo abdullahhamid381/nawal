@@ -5,8 +5,8 @@ import { Heart, Menu, Search, ShoppingBag, User, X, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { categories } from "@/data/products";
 import { company } from "@/data/company";
+import { useCatalog } from "@/lib/catalog";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
@@ -21,6 +21,7 @@ const nav = [
 
 export function Header() {
   const { cartCount, wishlist, compare } = useStore();
+  const { categories } = useCatalog();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -98,16 +99,31 @@ export function Header() {
           </nav>
 
           <div className="ml-auto flex items-center gap-0.5">
-            <Button variant="ghost" size="icon" aria-label="Search products" onClick={() => setSearchOpen((v) => !v)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Search products"
+              onClick={() => setSearchOpen((v) => !v)}
+            >
               <Search className="size-5" />
             </Button>
-            <Button variant="ghost" size="icon" asChild aria-label={`Comparison (${compare.length})`}>
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              aria-label={`Comparison (${compare.length})`}
+            >
               <Link to="/compare" className="relative hidden sm:inline-flex">
                 <Scale className="size-5" />
                 {compare.length > 0 && <CountDot n={compare.length} />}
               </Link>
             </Button>
-            <Button variant="ghost" size="icon" asChild aria-label={`Wishlist (${wishlist.length})`}>
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              aria-label={`Wishlist (${wishlist.length})`}
+            >
               <Link to="/wishlist" className="relative">
                 <Heart className="size-5" />
                 {wishlist.length > 0 && <CountDot n={wishlist.length} />}
@@ -139,21 +155,54 @@ export function Header() {
                 </SheetHeader>
                 <nav aria-label="Mobile" className="flex flex-col p-3">
                   {nav.map((n) => (
-                    <Link key={n.to} to={n.to} className="rounded-lg px-3 py-3 text-base font-medium transition-colors hover:bg-secondary">
+                    <Link
+                      key={n.to}
+                      to={n.to}
+                      className="rounded-lg px-3 py-3 text-base font-medium transition-colors hover:bg-secondary"
+                    >
                       {n.label}
                     </Link>
                   ))}
-                  <p className="mt-4 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Categories</p>
+                  <p className="mt-4 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Categories
+                  </p>
                   {categories.map((c) => (
-                    <Link key={c.slug} to="/shop" search={{ category: c.slug }} className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
+                    <Link
+                      key={c.slug}
+                      to="/shop"
+                      search={{ category: c.slug }}
+                      className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                    >
                       {c.name}
                     </Link>
                   ))}
-                  <p className="mt-4 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Account</p>
-                  <Link to="/account" className="rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-secondary">My account & orders</Link>
-                  <Link to="/wishlist" className="rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-secondary">Wishlist</Link>
-                  <Link to="/compare" className="rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-secondary">Compare products</Link>
-                  <Link to="/faq" className="rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-secondary">Help & FAQ</Link>
+                  <p className="mt-4 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Account
+                  </p>
+                  <Link
+                    to="/account"
+                    className="rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-secondary"
+                  >
+                    My account & orders
+                  </Link>
+                  <Link
+                    to="/wishlist"
+                    className="rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-secondary"
+                  >
+                    Wishlist
+                  </Link>
+                  <Link
+                    to="/compare"
+                    className="rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-secondary"
+                  >
+                    Compare products
+                  </Link>
+                  <Link
+                    to="/faq"
+                    className="rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-secondary"
+                  >
+                    Help & FAQ
+                  </Link>
                 </nav>
               </SheetContent>
             </Sheet>
@@ -185,7 +234,13 @@ export function Header() {
                 <Button type="submit" size="sm">
                   Search
                 </Button>
-                <Button type="button" size="icon" variant="ghost" aria-label="Close search" onClick={() => setSearchOpen(false)}>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Close search"
+                  onClick={() => setSearchOpen(false)}
+                >
                   <X className="size-4" />
                 </Button>
               </form>

@@ -7,11 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { PageHeader } from "@/components/site/PageHeader";
 import { ProductCard } from "@/components/site/ProductCard";
-import { categories, products } from "@/data/products";
+import { useCatalog } from "@/lib/catalog";
 
 type ShopSearch = {
   q?: string | undefined;
@@ -38,7 +44,10 @@ export const Route = createFileRoute("/shop")({
           "Browse the full Northbay Retail Co. catalogue: audio, kitchen, home, fitness and travel products with search, filtering and secure checkout.",
       },
       { property: "og:title", content: "Shop All Products — Northbay Retail Co." },
-      { property: "og:description", content: "Browse quality everyday products with search, category and price filtering." },
+      {
+        property: "og:description",
+        content: "Browse quality everyday products with search, category and price filtering.",
+      },
       { property: "og:url", content: "/shop" },
     ],
     links: [{ rel: "canonical", href: "/shop" }],
@@ -52,6 +61,7 @@ const MAX_PRICE = 200;
 function ShopPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+  const { products, categories } = useCatalog();
 
   const [query, setQuery] = useState(search.q ?? "");
   const [price, setPrice] = useState<number[]>([MAX_PRICE]);
@@ -90,7 +100,7 @@ function ShopPage() {
     if (sort === "name") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     if (sort === "featured") list = [...list].sort((a, b) => (b.badge ? 1 : 0) - (a.badge ? 1 : 0));
     return list;
-  }, [search.q, activeCategories.join(","), price, inStockOnly, sort]);
+  }, [search.q, activeCategories.join(","), price, inStockOnly, sort, products]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const current = Math.min(page, pages);
@@ -117,11 +127,22 @@ function ShopPage() {
       </div>
       <div>
         <h3 className="text-sm font-semibold">Max price</h3>
-        <Slider className="mt-4" value={price} onValueChange={setPrice} min={20} max={MAX_PRICE} step={5} />
+        <Slider
+          className="mt-4"
+          value={price}
+          onValueChange={setPrice}
+          min={20}
+          max={MAX_PRICE}
+          step={5}
+        />
         <p className="mt-2 text-sm text-muted-foreground">Up to ${price[0]}</p>
       </div>
       <div className="flex items-center gap-2.5">
-        <Checkbox id="stock" checked={inStockOnly} onCheckedChange={(v) => setInStockOnly(v === true)} />
+        <Checkbox
+          id="stock"
+          checked={inStockOnly}
+          onCheckedChange={(v) => setInStockOnly(v === true)}
+        />
         <Label htmlFor="stock" className="cursor-pointer text-sm font-normal">
           In stock only
         </Label>
@@ -163,7 +184,10 @@ function ShopPage() {
                 setSearch({ q: query || undefined });
               }}
             >
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
               <Label htmlFor="shop-search" className="sr-only">
                 Search products
               </Label>
@@ -210,7 +234,9 @@ function ShopPage() {
           {visible.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-12 text-center">
               <h2 className="text-lg font-semibold">No products match those filters</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Try widening your price range or clearing filters.</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Try widening your price range or clearing filters.
+              </p>
             </div>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -222,7 +248,14 @@ function ShopPage() {
 
           {pages > 1 && (
             <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-2">
-              <Button variant="outline" size="sm" disabled={current === 1} onClick={() => void navigate({ search: (p: ShopSearch) => ({ ...p, page: current - 1 }) })}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={current === 1}
+                onClick={() =>
+                  void navigate({ search: (p: ShopSearch) => ({ ...p, page: current - 1 }) })
+                }
+              >
                 Previous
               </Button>
               {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
@@ -236,7 +269,14 @@ function ShopPage() {
                   {n}
                 </Button>
               ))}
-              <Button variant="outline" size="sm" disabled={current === pages} onClick={() => void navigate({ search: (p: ShopSearch) => ({ ...p, page: current + 1 }) })}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={current === pages}
+                onClick={() =>
+                  void navigate({ search: (p: ShopSearch) => ({ ...p, page: current + 1 }) })
+                }
+              >
                 Next
               </Button>
             </nav>
@@ -244,7 +284,10 @@ function ShopPage() {
 
           <p className="mt-10 text-sm text-muted-foreground">
             Looking for something specific?{" "}
-            <Link to="/contact" className="font-medium text-primary underline-offset-4 hover:underline">
+            <Link
+              to="/contact"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
               Contact our team
             </Link>{" "}
             and we will help you find it.

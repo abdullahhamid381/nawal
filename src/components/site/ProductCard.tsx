@@ -5,14 +5,24 @@ import { Eye, Heart, Scale, ShoppingCart, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { categoryName, type Product } from "@/data/products";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { type Product } from "@/data/products";
+import { useCatalog } from "@/lib/catalog";
 import { money, useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Rating } from "./Rating";
 
 export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const { addToCart, toggleWishlist, wishlist, toggleCompare, compare } = useStore();
+  const { categories } = useCatalog();
+  const categoryName =
+    categories.find((c) => c.slug === product.category)?.name ?? product.category;
   const [quickView, setQuickView] = useState(false);
   const wished = wishlist.includes(product.slug);
   const compared = compare.includes(product.slug);
@@ -38,7 +48,10 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
         </Link>
         <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-3">
           {product.badge ? (
-            <Badge variant={product.badge === "Limited Stock" ? "destructive" : "secondary"} className="pointer-events-auto">
+            <Badge
+              variant={product.badge === "Limited Stock" ? "destructive" : "secondary"}
+              className="pointer-events-auto"
+            >
               {product.badge}
             </Badge>
           ) : (
@@ -86,10 +99,14 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          {categoryName(product.category)}
+          {categoryName}
         </p>
         <h3 className="text-sm font-semibold leading-snug">
-          <Link to="/product/$slug" params={{ slug: product.slug }} className="after:absolute after:inset-0 after:content-[''] hover:underline">
+          <Link
+            to="/product/$slug"
+            params={{ slug: product.slug }}
+            className="after:absolute after:inset-0 after:content-[''] hover:underline"
+          >
             {product.name}
           </Link>
         </h3>
@@ -98,9 +115,13 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           <div>
             <span className="text-base font-bold">{money(product.price)}</span>
             {product.compareAt && (
-              <span className="ml-2 text-xs text-muted-foreground line-through">{money(product.compareAt)}</span>
+              <span className="ml-2 text-xs text-muted-foreground line-through">
+                {money(product.compareAt)}
+              </span>
             )}
-            <p className={cn("text-[11px]", product.stock > 0 ? "text-success" : "text-destructive")}>
+            <p
+              className={cn("text-[11px]", product.stock > 0 ? "text-success" : "text-destructive")}
+            >
               {product.stock > 0 ? `In stock (${product.stock})` : "Out of stock"}
             </p>
           </div>

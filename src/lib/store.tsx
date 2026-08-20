@@ -1,5 +1,14 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { products, type Product } from "@/data/products";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import { type Product } from "@/data/products";
+import { useCatalog } from "@/lib/catalog";
 
 type CartLine = { slug: string; qty: number };
 
@@ -38,6 +47,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [compare, setCompare] = useState<string[]>([]);
   const [coupon, setCoupon] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const { products } = useCatalog();
 
   useEffect(() => {
     try {
@@ -69,20 +79,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setQty = useCallback((slug: string, qty: number) => {
-    setCart((c) => (qty <= 0 ? c.filter((l) => l.slug !== slug) : c.map((l) => (l.slug === slug ? { ...l, qty } : l))));
+    setCart((c) =>
+      qty <= 0
+        ? c.filter((l) => l.slug !== slug)
+        : c.map((l) => (l.slug === slug ? { ...l, qty } : l)),
+    );
   }, []);
 
-  const removeFromCart = useCallback((slug: string) => setCart((c) => c.filter((l) => l.slug !== slug)), []);
+  const removeFromCart = useCallback(
+    (slug: string) => setCart((c) => c.filter((l) => l.slug !== slug)),
+    [],
+  );
   const clearCart = useCallback(() => setCart([]), []);
 
   const toggleWishlist = useCallback(
-    (slug: string) => setWishlist((w) => (w.includes(slug) ? w.filter((s) => s !== slug) : [...w, slug])),
+    (slug: string) =>
+      setWishlist((w) => (w.includes(slug) ? w.filter((s) => s !== slug) : [...w, slug])),
     [],
   );
 
   const toggleCompare = useCallback(
     (slug: string) =>
-      setCompare((c) => (c.includes(slug) ? c.filter((s) => s !== slug) : c.length >= 4 ? c : [...c, slug])),
+      setCompare((c) =>
+        c.includes(slug) ? c.filter((s) => s !== slug) : c.length >= 4 ? c : [...c, slug],
+      ),
     [],
   );
 
@@ -131,7 +151,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       tax,
       total,
     };
-  }, [cart, wishlist, compare, coupon, addToCart, setQty, removeFromCart, clearCart, toggleWishlist, toggleCompare, applyCoupon]);
+  }, [
+    cart,
+    wishlist,
+    compare,
+    coupon,
+    products,
+    addToCart,
+    setQty,
+    removeFromCart,
+    clearCart,
+    toggleWishlist,
+    toggleCompare,
+    applyCoupon,
+  ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
